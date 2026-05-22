@@ -288,7 +288,7 @@
     <div class="modal-overlay" id="infoModal">
         <div class="modal-content">
             <span class="modal-close-x" onclick="closeModal('infoModal')">×</span>
-            <div class="modal-header">🟢 IP Detay Analiz Paneli</div>
+            <div class="modal-header">🟢 IP BİLGİLERİ 🟢</div>
             
             <div class="info-grid" id="infoGridBody">
                 </div>
@@ -346,7 +346,7 @@
                     document.getElementById("statusText").innerHTML = "";
                     
                     if (data.error) {
-                        document.getElementById("statusText").innerHTML = "<span style='color:#ff4a4a;'>Geçersiz veya bulunamayan IP adresi!</span>";
+                        document.getElementById("statusText").innerHTML = "<span style='color:#ff4a4a;'>GEÇERSİZ IP ADRESİ</span>";
                         return;
                     }
 
@@ -387,7 +387,7 @@
             // Verileri toplarken eğer eksik alan varsa büyük harfle 'BİLİNMİYOR' yazdırıyoruz
             var mapsUrl = currentRawData.latitude && currentRawData.longitude ? `https://www.google.com/maps?q=$${currentRawData.latitude},${currentRawData.longitude}` : 'BİLİNMİYOR';
 
-            var textToCopy = `--- IP SORGULAMA SONUÇLARI ---
+            var textToCopy = `🔱 IP SORGULAMA SONUÇLARI 🔱
 IP ADRESİ : ${currentRawData.ip || 'BİLİNMİYOR'}
 ÜLKE : ${currentRawData.country_name || 'BİLİNMİYOR'}
 ŞEHİR : ${currentRawData.city || 'BİLİNMİYOR'}
