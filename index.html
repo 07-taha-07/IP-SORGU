@@ -80,8 +80,8 @@
     function getIPInfo() {
         var ip = document.getElementById("ipInput").value.trim();
         
-        // Eğer kutu boşsa API'ye boş parametre gönderiyoruz (API otomatik olarak sorgulayanın IP'sini getirir)
-        var apiUrl = `https://ipwho.is/${ip}`;
+        // Eğer kutu boşsa kendi IP'sini çekmesi için URL'yi ayarlıyoruz, doluysa o IP'yi yazıyoruz
+        var apiUrl = ip === "" ? "https://ipapi.co/json/" : `https://ipapi.co/${ip}/json/`;
 
         document.getElementById("error").innerHTML = "Sorgulanıyor...";
         document.getElementById("ipInfo").innerHTML = "";
@@ -96,27 +96,27 @@
             .then(data => {
                 document.getElementById("error").innerHTML = "";
                 
-                // API içinden dönen başarısız durum mesajı kontrolü
-                if (data.success === false) {
-                    document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + (data.message || "Geçersiz IP adresi.");
+                // ipapi.co hata döndürürse kontrol et
+                if (data.error) {
+                    document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + (data.reason || "Geçersiz IP adresi.");
                     return;
                 }
 
                 var resultHTML = `
                     <div class="result">
                         <div><strong>IP ADRESİ :</strong> ${data.ip || 'BİLİNMİYOR'}</div>
-                        <div><strong>ÜLKE :</strong> ${data.country || 'BİLİNMİYOR'}</div>
+                        <div><strong>ÜLKE :</strong> ${data.country_name || 'BİLİNMİYOR'}</div>
                         <div><strong>ŞEHİR :</strong> ${data.city || 'BİLİNMİYOR'}</div>
                         <div><strong>BÖLGE :</strong> ${data.region || 'BİLİNMİYOR'}</div>
                         <div><strong>ENLEM :</strong> ${data.latitude || 'BİLİNMİYOR'}</div>
                         <div><strong>BOYLAM :</strong> ${data.longitude || 'BİLİNMİYOR'}</div>
-                        <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone ? data.timezone.id : 'BİLİNMİYOR'}</div>
-                        <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.connection ? data.connection.isp : 'BİLİNMİYOR'}</div>
+                        <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone || 'BİLİNMİYOR'}</div>
+                        <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.org || 'BİLİNMİYOR'}</div>
                         <div><strong>POSTA KODU:</strong> ${data.postal || 'BİLİNMİYOR'}</div>
-                        <div><strong>BAĞLANTI TÜRÜ :</strong> ${data.connection ? data.connection.org : 'BİLİNMİYOR'}</div>
-                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.connection ? data.connection.asn : 'BİLİNMİYOR'}</div>
-                        <div><strong>IP TÜRÜ :</strong> ${data.type || 'IPv4'}</div>
-                        <div><strong>HOSTNAME :</strong> ${data.borders || 'BİLİNMİYOR'}</div>
+                        <div><strong>BAĞLANTI TÜRÜ :</strong> ${data.network || 'BİLİNMİYOR'}</div>
+                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.asn || 'BİLİNMİYOR'}</div>
+                        <div><strong>IP TÜRÜ :</strong> ${data.version || 'IPv4'}</div>
+                        <div><strong>HOSTNAME :</strong> ${data.country_code || 'BİLİNMİYOR'}</div>
                         <div><strong>DİSCORD :</strong> @OB_OYUN_BOZANLAR</div>
                     </div>
                 `;
