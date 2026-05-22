@@ -5,10 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IP ADRESİ SORGULAMA</title>
     <style>
-        /* Arka Plan Fotoğrafı Ekleme */
+        :root {
+            --bg-panel: rgba(15, 22, 36, 0.85);
+            --border-color: rgba(0, 255, 170, 0.2);
+            --accent-green: #00ffaa;
+            --accent-blue: #00a2ff;
+            --accent-red: #ff4a4a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-image: url('https://i.ibb.co/NvKwQ9j/1779440098778.png'); /* Buraya ImgBB URL'nizi ekleyin */
+            background-image: url('https://i.ibb.co/NvKwQ9j/1779440098778.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -17,166 +33,383 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
-            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Ana Konteyner */
+        .main-container {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.5s ease;
         }
 
         h1 {
             color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 255, 170, 0.3);
         }
 
+        h1 span {
+            color: var(--accent-green);
+        }
+
+        /* Input Alanı */
         input[type="text"] {
-            padding: 10px;
+            width: 100%;
+            padding: 12px 20px;
             font-size: 16px;
-            width: 300px;
-            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 1.5rem;
             text-align: center;
+            outline: none;
+            transition: all 0.3s;
+            user-select: text;
         }
 
+        input[type="text"]:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.2);
+        }
+
+        /* Buton Grupları */
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
         }
 
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            flex: 1;
+            padding: 12px;
+            font-size: 15px;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
         }
 
         .btn-search {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
 
         .btn-search:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
         }
 
         .btn-self {
-            background-color: #00a2ff;
+            background: linear-gradient(135deg, var(--accent-blue), #0066cc);
+            box-shadow: 0 4px 15px rgba(0, 162, 255, 0.3);
         }
 
         .btn-self:hover {
-            background-color: #0088d4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 162, 255, 0.5);
         }
 
-        .result {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 800px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* Durum Mesajı */
+        .status-text {
+            color: var(--accent-green);
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 14px;
+            min-height: 20px;
         }
 
-        .result strong {
-            color: #333;
+        /* --- Ekstra Paneller (Modals) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 6, 8, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #0f141c;
+            border: 1px solid var(--accent-green);
+            width: 90%;
+            max-width: 650px;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.2);
+        }
+
+        .modal-content.alert-variant {
+            border-color: var(--accent-red);
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(255, 74, 74, 0.2);
+            text-align: center;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: scale(1);
+        }
+
+        /* Çarpı Butonu */
+        .modal-close-x {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close-x:hover {
+            color: var(--accent-red);
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+
+        /* Bilgi Satırları Dökümü */
+        .info-grid {
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
+            user-select: text;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            font-size: 14px;
+        }
+
+        .info-row strong {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .info-row span {
+            color: var(--text-main);
+            font-weight: 500;
+            text-align: right;
         }
 
         .maps-link {
-            color: #0066cc;
-            text-decoration: underline;
+            color: var(--accent-blue);
+            text-decoration: none;
             font-weight: bold;
         }
 
         .maps-link:hover {
-            color: #004499;
+            text-decoration: underline;
         }
 
-        .error {
-            color: red;
-            font-size: 16px;
-            margin-top: 10px;
-            font-weight: bold;
+        /* Alt Aksiyon Butonları */
+        .modal-footer-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-green), #00b377);
+            color: #000;
+        }
+
+        .modal-footer-btn:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
+        }
+
+        .alert-close-btn {
+            background: var(--accent-red);
+            margin-top: 1.5rem;
+        }
+
+        .alert-close-btn:hover {
+            box-shadow: 0 0 15px rgba(255, 74, 74, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-<h1>IP ADRESİ SORGULAMA</h1>
-<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN">
-
-<div class="btn-group">
-    <button class="btn-search" onclick="getIPInfo(false)">SORGULA</button>
-    <button class="btn-self" onclick="getIPInfo(true)">KENDİMİ SORGULA</button>
-</div>
-
-<div id="ipInfo"></div>
-<div id="error" class="error"></div>
-
-<script>
-    function getIPInfo(isSelfQuery) {
-        var ipInput = document.getElementById("ipInput");
-        var ip = ipInput.value.trim();
+    <div class="main-container">
+        <h1>IP <span>Sorgulama</span></h1>
+        <input type="text" id="ipInput" placeholder="Sorgulanacak IP Adresini Girin">
         
-        // Eğer Kendimi Sorgula butonuna basılmadıysa ve kutu boşsa uyarı ver
-        if (!isSelfQuery && ip === "") {
-            alert("LÜTFEN BİR IP ADRESİ GİRİN.");
-            return;
+        <div class="btn-group">
+            <button class="btn-search" onclick="getIPInfo(false)">Sorgula</button>
+            <button class="btn-self" onclick="getIPInfo(true)">Kendimi Sorgula</button>
+        </div>
+
+        <div id="statusText" class="status-text"></div>
+    </div>
+
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content">
+            <span class="modal-close-x" onclick="closeModal('infoModal')">×</span>
+            <div class="modal-header">🟢 IP Detay Analiz Paneli</div>
+            
+            <div class="info-grid" id="infoGridBody">
+                </div>
+
+            <button class="modal-footer-btn" onclick="copyDataToClipboard()">Bilgileri Kopyala</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-content alert-variant">
+            <span class="modal-close-x" onclick="closeModal('alertModal')">×</span>
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+            <div style="color: #fff; font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">SİSTEM UYARISI</div>
+            <p style="color: var(--text-muted); font-size: 14px;">LÜTFEN BİR IP ADRESİ GİRİN.</p>
+            <button class="alert-close-btn" onclick="closeModal('alertModal')">Kapat</button>
+        </div>
+    </div>
+
+    <script>
+        let currentRawData = null; // Kopyalama işlemi için veriyi saklayacağımız global değişken
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('open');
         }
 
-        // Eğer Kendimi Sorgula butonuna basıldıysa input kutusunu temizle ve kendi IP URL'sini hazırla
-        var apiUrl = "";
-        if (isSelfQuery) {
-            ipInput.value = ""; // Kutuyu temizle
-            apiUrl = "https://ipapi.co/json/";
-        } else {
-            apiUrl = `https://ipapi.co/${ip}/json/`;
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('open');
         }
 
-        document.getElementById("error").innerHTML = "Sorgulanıyor...";
-        document.getElementById("ipInfo").innerHTML = "";
+        function getIPInfo(isSelfQuery) {
+            var ipInput = document.getElementById("ipInput");
+            var ip = ipInput.value.trim();
+            
+            if (!isSelfQuery && ip === "") {
+                openModal('alertModal');
+                return;
+            }
 
-        fetch(apiUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Sunucu hatası kodu: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("error").innerHTML = "";
-                
-                if (data.error) {
-                    document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + (data.reason || "Geçersiz IP adresi.");
-                    return;
-                }
+            var apiUrl = "";
+            if (isSelfQuery) {
+                ipInput.value = ""; 
+                apiUrl = "https://ipapi.co/json/";
+            } else {
+                apiUrl = `https://ipapi.co/${ip}/json/`;
+            }
 
-                // Harita linki oluşturma (Enlem ve boylama göre Google Maps linki)
-                var mapsUrl = `https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`;
+            document.getElementById("statusText").innerHTML = "Siber veri tabanından sorgulanıyor...";
 
-                var resultHTML = `
-                    <div class="result">
-                        <div><strong>IP ADRESİ :</strong> ${data.ip || 'BİLİNMİYOR'}</div>
-                        <div><strong>ÜLKE :</strong> ${data.country_name || 'BİLİNMİYOR'}</div>
-                        <div><strong>ŞEHİR :</strong> ${data.city || 'BİLİNMİYOR'}</div>
-                        <div><strong>BÖLGE :</strong> ${data.region || 'BİLİNMİYOR'}</div>
-                        <div><strong>ENLEM :</strong> ${data.latitude || 'BİLİNMİYOR'}</div>
-                        <div><strong>BOYLAM :</strong> ${data.longitude || 'BİLİNMİYOR'}</div>
-                        <div><strong>YAKLAŞIK LOKASYON :</strong> <a href="${mapsUrl}" target="_blank" class="maps-link">Haritada Göster (Haritayı Açmak İçin Tıkla)</a></div>
-                        <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone || 'BİLİNMİYOR'}</div>
-                        <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.org || 'BİLİNMİYOR'}</div>
-                        <div><strong>POSTA KODU:</strong> ${data.postal || 'BİLİNMİYOR'}</div>
-                        <div><strong>BAĞLANTI TÜRÜ :</strong> ${data.network || 'BİLİNMİYOR'}</div>
-                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.asn || 'BİLİNMİYOR'}</div>
-                        <div><strong>IP TÜRÜ :</strong> ${data.version || 'IPv4'}</div>
-                        <div><strong>HOSTNAME :</strong> ${data.country_code || 'BİLİNMİYOR'}</div>
-                        <div><strong>DİSCORD :</strong> @OB_OYUN_BOZANLAR</div>
-                    </div>
-                `;
-                document.getElementById("ipInfo").innerHTML = resultHTML;
-            })
-            .catch(error => {
-                document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + error.message;
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Hata Kodu: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("statusText").innerHTML = "";
+                    
+                    if (data.error) {
+                        document.getElementById("statusText").innerHTML = "<span style='color:#ff4a4a;'>Geçersiz veya bulunamayan IP adresi!</span>";
+                        return;
+                    }
+
+                    currentRawData = data; 
+                    var mapsUrl = `https://www.google.com/maps?q=$${data.latitude},${data.longitude}`;
+
+                    // Bilgi panelinin içeriğini hazırlama
+                    var gridHTML = `
+                        <div class="info-row"><strong>IP ADRESİ :</strong> <span>${data.ip || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>ÜLKE :</strong> <span>${data.country_name || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>ŞEHİR :</strong> <span>${data.city || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>BÖLGE :</strong> <span>${data.region || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>ENLEM :</strong> <span>${data.latitude || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>BOYLAM :</strong> <span>${data.longitude || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>YAKLAŞIK LOKASYON :</strong> <span><a href="${mapsUrl}" target="_blank" class="maps-link">Haritada Göster 🌐</a></span></div>
+                        <div class="info-row"><strong>ZAMAN DİLİMİ :</strong> <span>${data.timezone || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>ISP (SERVİS SAĞLAYICI) :</strong> <span>${data.org || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>POSTA KODU :</strong> <span>${data.postal || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>BAĞLANTI TÜRÜ :</strong> <span>${data.network || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>ŞİRKET / ASN :</strong> <span>${data.asn || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>IP SÜRÜMÜ :</strong> <span>${data.version || 'IPv4'}</span></div>
+                        <div class="info-row"><strong>ÜLKE KODU :</strong> <span>${data.country_code || 'BİLİNMİYOR'}</span></div>
+                        <div class="info-row"><strong>DISCORD :</strong> <span style="color:var(--accent-blue); font-weight:bold;">@OB_OYUN_BOZANLAR</span></div>
+                    `;
+                    
+                    document.getElementById("infoGridBody").innerHTML = gridHTML;
+                    openModal('infoModal'); 
+                })
+                .catch(error => {
+                    document.getElementById("statusText").innerHTML = "<span style='color:#ff4a4a;'>Bağlantı Hatası: " + error.message + "</span>";
+                });
+        }
+
+        // Gelişmiş Tam Kopyalama Fonksiyonu (15 Alanın Tamamı & Büyük Harf BİLİNMİYOR)
+        function copyDataToClipboard() {
+            if (!currentRawData) return;
+
+            // Verileri toplarken eğer eksik alan varsa büyük harfle 'BİLİNMİYOR' yazdırıyoruz
+            var mapsUrl = currentRawData.latitude && currentRawData.longitude ? `https://www.google.com/maps?q=$${currentRawData.latitude},${currentRawData.longitude}` : 'BİLİNMİYOR';
+
+            var textToCopy = `--- IP SORGULAMA SONUÇLARI ---
+IP ADRESİ : ${currentRawData.ip || 'BİLİNMİYOR'}
+ÜLKE : ${currentRawData.country_name || 'BİLİNMİYOR'}
+ŞEHİR : ${currentRawData.city || 'BİLİNMİYOR'}
+BÖLGE : ${currentRawData.region || 'BİLİNMİYOR'}
+ENLEM : ${currentRawData.latitude || 'BİLİNMİYOR'}
+BOYLAM : ${currentRawData.longitude || 'BİLİNMİYOR'}
+YAKLAŞIK LOKASYON : ${mapsUrl}
+ZAMAN DİLİMİ : ${currentRawData.timezone || 'BİLİNMİYOR'}
+ISP (SERVİS SAĞLAYICI) : ${currentRawData.org || 'BİLİNMİYOR'}
+POSTA KODU : ${currentRawData.postal || 'BİLİNMİYOR'}
+BAĞLANTI TÜRÜ : ${currentRawData.network || 'BİLİNMİYOR'}
+ŞİRKET / ASN : ${currentRawData.asn || 'BİLİNMİYOR'}
+IP SÜRÜMÜ : ${currentRawData.version || 'IPv4'}
+ÜLKE KODU : ${currentRawData.country_code || 'BİLİNMİYOR'}
+DISCORD : @OB_OYUN_BOZANLAR`;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("TÜM BİLGİLER PANOYA KOPYALANDI");
+            }).catch(err => {
+                alert("KOPYALAMA BAŞARISIZ OLDU: " + err);
             });
-    }
-</script>
-
+        }
+    </script>
 </body>
 </html>
