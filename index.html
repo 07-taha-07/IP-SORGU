@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP ADRESİ SORGULAMA</title>
+    <style>
+        /* Arka Plan Fotoğrafı Ekleme */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://i.ibb.co/NvKwQ9j/1779440098778.png'); /* Buraya ImgBB URL'nizi ekleyin */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result strong {
+            color: #333;
+        }
+
+        .error {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>IP ADRESİ SORGULAMA</h1>
+<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN">
+<button onclick="getIPInfo()">SORGULA</button>
+
+<div id="ipInfo"></div>
+<div id="error" class="error"></div>
+
+<script>
+    function getIPInfo() {
+        var ip = document.getElementById("ipInput").value;
+        if (ip === "") {
+            alert("LÜTFEN BİR IP ADRESİ GİRİN.");
+            return;
+        }
+
+        var apiUrl = `http://ip-api.com/json/${ip}`;
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('IP SORGULAMA BAŞARISIZ OLDU!');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById("error").innerHTML = "";
+                var resultHTML = `
+                    <div class="result">
+                        <div><strong>IP ADRRSİ :</strong> ${data.query}</div>
+                        <div><strong>ÜLKE :</strong> ${data.country}</div>
+                        <div><strong>ŞEHİR :</strong> ${data.city || 'BİLİNMİYOR'}</div>
+                        <div><strong>BÖLGE :</strong> ${data.regionName || 'BİLİNMİYOR'}</div>
+                        <div><strong>ENLEM :</strong> ${data.lat}</div>
+                        <div><strong>BOYLAM :</strong> ${data.lon}</div>
+                        <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone || 'BİLİNMİYOR'}</div>
+                        <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.isp || 'BİLİNMİYOR'}</div>
+                        <div><strong>POSTA KODU:</strong> ${data.zip || 'BİLİNMİYOR'}</div>
+                        <div><strong>BAĞLANTI TÜRÜ :</strong> ${data.org || 'BİLİNMİYOR'}</div>
+                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.as || 'BİLİNMİYOR'}</div>
+                        <div><strong>IP TÜRÜ :</strong> ${data.type || 'BİLİNMİYOR'}</div>
+                        <div><strong>HOSTNAME :</strong> ${data.hostname || 'BİLİNMİYOR'}</div>1111
+                        <div><strong>DİSCORD :</strong> ${data.hostname || '@OB_OYUN_BOZANLAR'}</div>
+                    </div>
+                `;
+                document.getElementById("ipInfo").innerHTML = resultHTML;
+            })
+            .catch(error => {
+                document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + error.message;
+            });
+    }
+</script>
+
+</body>
+</html>
