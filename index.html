@@ -30,20 +30,40 @@
             font-size: 16px;
             width: 300px;
             margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
         }
 
-        button:hover {
+        .btn-search {
+            background-color: #4CAF50;
+        }
+
+        .btn-search:hover {
             background-color: #45a049;
+        }
+
+        .btn-self {
+            background-color: #00a2ff;
+        }
+
+        .btn-self:hover {
+            background-color: #0088d4;
         }
 
         .result {
@@ -52,7 +72,6 @@
             border-radius: 8px;
             width: 80%;
             max-width: 800px;
-            margin-top: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -60,28 +79,56 @@
             color: #333;
         }
 
+        .maps-link {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .maps-link:hover {
+            color: #004499;
+        }
+
         .error {
             color: red;
             font-size: 16px;
             margin-top: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <h1>IP ADRESİ SORGULAMA</h1>
-<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN (BOŞ BIRAKIRSANIZ KENDİ IP'NİZ)">
-<button onclick="getIPInfo()">SORGULA</button>
+<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN">
+
+<div class="btn-group">
+    <button class="btn-search" onclick="getIPInfo(false)">SORGULA</button>
+    <button class="btn-self" onclick="getIPInfo(true)">KENDİMİ SORGULA</button>
+</div>
 
 <div id="ipInfo"></div>
 <div id="error" class="error"></div>
 
 <script>
-    function getIPInfo() {
-        var ip = document.getElementById("ipInput").value.trim();
+    function getIPInfo(isSelfQuery) {
+        var ipInput = document.getElementById("ipInput");
+        var ip = ipInput.value.trim();
         
-        // Eğer kutu boşsa kendi IP'sini çekmesi için URL'yi ayarlıyoruz, doluysa o IP'yi yazıyoruz
-        var apiUrl = ip === "" ? "https://ipapi.co/json/" : `https://ipapi.co/${ip}/json/`;
+        // Eğer Kendimi Sorgula butonuna basılmadıysa ve kutu boşsa uyarı ver
+        if (!isSelfQuery && ip === "") {
+            alert("LÜTFEN BİR IP ADRESİ GİRİN.");
+            return;
+        }
+
+        // Eğer Kendimi Sorgula butonuna basıldıysa input kutusunu temizle ve kendi IP URL'sini hazırla
+        var apiUrl = "";
+        if (isSelfQuery) {
+            ipInput.value = ""; // Kutuyu temizle
+            apiUrl = "https://ipapi.co/json/";
+        } else {
+            apiUrl = `https://ipapi.co/${ip}/json/`;
+        }
 
         document.getElementById("error").innerHTML = "Sorgulanıyor...";
         document.getElementById("ipInfo").innerHTML = "";
@@ -96,11 +143,13 @@
             .then(data => {
                 document.getElementById("error").innerHTML = "";
                 
-                // ipapi.co hata döndürürse kontrol et
                 if (data.error) {
                     document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + (data.reason || "Geçersiz IP adresi.");
                     return;
                 }
+
+                // Harita linki oluşturma (Enlem ve boylama göre Google Maps linki)
+                var mapsUrl = `https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`;
 
                 var resultHTML = `
                     <div class="result">
@@ -110,6 +159,7 @@
                         <div><strong>BÖLGE :</strong> ${data.region || 'BİLİNMİYOR'}</div>
                         <div><strong>ENLEM :</strong> ${data.latitude || 'BİLİNMİYOR'}</div>
                         <div><strong>BOYLAM :</strong> ${data.longitude || 'BİLİNMİYOR'}</div>
+                        <div><strong>YAKLAŞIK LOKASYON :</strong> <a href="${mapsUrl}" target="_blank" class="maps-link">Haritada Göster (Haritayı Açmak İçin Tıkla)</a></div>
                         <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone || 'BİLİNMİYOR'}</div>
                         <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.org || 'BİLİNMİYOR'}</div>
                         <div><strong>POSTA KODU:</strong> ${data.postal || 'BİLİNMİYOR'}</div>
