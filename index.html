@@ -70,7 +70,7 @@
 <body>
 
 <h1>IP ADRESİ SORGULAMA</h1>
-<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN">
+<input type="text" id="ipInput" placeholder="IP ADRESİ GİRİN (BOŞ BIRAKIRSANIZ KENDİ IP'NİZ)">
 <button onclick="getIPInfo()">SORGULA</button>
 
 <div id="ipInfo"></div>
@@ -79,44 +79,42 @@
 <script>
     function getIPInfo() {
         var ip = document.getElementById("ipInput").value.trim();
-        if (ip === "") {
-            alert("LÜTFEN BİR IP ADRESİ GİRİN.");
-            return;
-        }
-
-        // GitHub Pages (HTTPS) ile tam uyumlu çalışan güvenli API adresi
+        
+        // Eğer kutu boşsa API'ye boş parametre gönderiyoruz (API otomatik olarak sorgulayanın IP'sini getirir)
         var apiUrl = `https://ipwho.is/${ip}`;
+
+        document.getElementById("error").innerHTML = "Sorgulanıyor...";
+        document.getElementById("ipInfo").innerHTML = "";
 
         fetch(apiUrl)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('IP SORGULAMA BAŞARISIZ OLDU!');
+                    throw new Error(`Sunucu hatası kodu: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
                 document.getElementById("error").innerHTML = "";
                 
-                // API'den dönen hatalı durum kontrolü
-                if(data.success === false) {
-                    document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: Geçersiz IP adresi girdiniz.";
-                    document.getElementById("ipInfo").innerHTML = "";
+                // API içinden dönen başarısız durum mesajı kontrolü
+                if (data.success === false) {
+                    document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + (data.message || "Geçersiz IP adresi.");
                     return;
                 }
 
                 var resultHTML = `
                     <div class="result">
-                        <div><strong>IP ADRESİ :</strong> ${data.ip}</div>
+                        <div><strong>IP ADRESİ :</strong> ${data.ip || 'BİLİNMİYOR'}</div>
                         <div><strong>ÜLKE :</strong> ${data.country || 'BİLİNMİYOR'}</div>
                         <div><strong>ŞEHİR :</strong> ${data.city || 'BİLİNMİYOR'}</div>
                         <div><strong>BÖLGE :</strong> ${data.region || 'BİLİNMİYOR'}</div>
-                        <div><strong>ENLEM :</strong> ${data.latitude}</div>
-                        <div><strong>BOYLAM :</strong> ${data.longitude}</div>
+                        <div><strong>ENLEM :</strong> ${data.latitude || 'BİLİNMİYOR'}</div>
+                        <div><strong>BOYLAM :</strong> ${data.longitude || 'BİLİNMİYOR'}</div>
                         <div><strong>ZAMAN DİLİMİ :</strong> ${data.timezone ? data.timezone.id : 'BİLİNMİYOR'}</div>
                         <div><strong>ISP (İNTERNET SERVİS SAĞLAYICISI) :</strong> ${data.connection ? data.connection.isp : 'BİLİNMİYOR'}</div>
                         <div><strong>POSTA KODU:</strong> ${data.postal || 'BİLİNMİYOR'}</div>
                         <div><strong>BAĞLANTI TÜRÜ :</strong> ${data.connection ? data.connection.org : 'BİLİNMİYOR'}</div>
-                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.connection ? data.connection.asn : 'BİLİNMİYOR'}</div>
+                        <div><strong>ŞİRKET/ORGANİZASYON :</strong> ${data.connection ? data.connection.asn : 'BİLİNMİYOR'}</div>
                         <div><strong>IP TÜRÜ :</strong> ${data.type || 'IPv4'}</div>
                         <div><strong>HOSTNAME :</strong> ${data.borders || 'BİLİNMİYOR'}</div>
                         <div><strong>DİSCORD :</strong> @OB_OYUN_BOZANLAR</div>
@@ -126,7 +124,6 @@
             })
             .catch(error => {
                 document.getElementById("error").innerHTML = "IP SORGULAMA HATASI: " + error.message;
-                document.getElementById("ipInfo").innerHTML = "";
             });
     }
 </script>
